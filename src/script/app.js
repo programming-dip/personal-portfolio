@@ -1,3 +1,4 @@
+// Auto dark theme
 if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.documentElement.setAttribute('data-theme', 'dark');
 
@@ -55,3 +56,73 @@ const typeWriter = () => {
 }
 
 window.onload = typeWriter();
+
+
+// smooth scroll
+const menuLinks = document.getElementsByClassName("menu-link");
+
+(Array.from(menuLinks)).forEach((menuLink) => {
+    menuLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        const targetId = menuLink.getAttribute("href");
+        const targetElement = document.getElementById(targetId.replace('#', ''));
+        targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        })
+    })
+})
+
+
+// contact form 
+const contactForm = document.getElementById('contact-form');
+
+contactForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(contactForm);
+    const object = Object.fromEntries(formData);
+    const jsonData = JSON.stringify(object);
+
+    fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: jsonData
+    })
+        .then(async (res) => {
+            let jsonStatus = await res.json();
+            if (res.status == 200) {
+                Swal.fire({
+                    title: "Message Sent Successfully",
+                    icon: "success",
+                    draggable: false
+                });
+            } else {
+                console.log(res);
+                Swal.fire({
+                    title: jsonStatus.message,
+                    icon: "error",
+                    draggable: false
+                });
+            }
+        })
+        .catch (error => {
+             console.log(error);
+                Swal.fire({
+                    title: "Something went wrong!",
+                    icon: "error",
+                    draggable: false
+                });             
+        })
+        .then (()=>{
+            contactForm.reset();
+            setTimeout(() => {
+                result.style.display = "none";
+            }, 3000);
+        });
+
+})
+
+
